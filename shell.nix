@@ -34,5 +34,6 @@ in pkgs.mkShell {
   buildInputs = with pkgs.buildPackages; [
     pkgs.python310Full
     cython-test
+    pyage
   ];
 }
