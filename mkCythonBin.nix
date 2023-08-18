@@ -41,6 +41,8 @@ let
     import ${main}
   '';
 
+  runshell = pkgs.writeShellScriptBin "nixos-update" '' ''
+
   # Create an executable Compiled Python script
   # Takes a attrs with : 
   #   - a name ( for the derivation )
@@ -62,7 +64,7 @@ in pkgs.stdenv.mkDerivation {
   # cythonize everything, no need for manual gcc
   # TODO : use manual gcc for custom build options      
   buildPhase = ''
-    ${cython}/bin/cythonize -if3 --no-docstrings *.py
+    ${cython}/bin/cythonize --embed -if3 --no-docstrings *.py
   '';
 
   # copy all so files and add our main

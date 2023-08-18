@@ -9,8 +9,9 @@
     let
       # support systems
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin"];
-      forAllSystems = function:
-        nixpkgs.lib.genAttrs systems
+
+      forAllSystems = function :
+        nixpkgs.lib.genAttrs  systems
         (system: function nixpkgs.legacyPackages.${system});
 
 
@@ -28,6 +29,6 @@
         value = import x pkgs (python pkgs);
         }) modules ));
 
-      devShells = forAllSystems (pkgs: import ./shell.nix { inherit pkgs; });
+      devShells = forAllSystems (pkgs: {default = import ./shell.nix { inherit pkgs; };});
     };
 }
