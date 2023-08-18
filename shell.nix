@@ -14,6 +14,8 @@ let
   print(f"name is : {__name__}")
   import age.file as age
   print(f"age : {age}")
+  import Crypto
+  print(f"Crypto : {Crypto}")
   '';
 
   pyage = mkPipInstall {
@@ -23,11 +25,12 @@ let
     libraries = ["pynacl" "requests" "cryptography" "click" "bcrypt"];
   };
 
+
   cython-test = mkCythonBin {
     name = "cython-test";
     main = "test";
     modules = [  test-cython ];
-    libraries = [ pyage ];
+    libraries = [ pyage "pycryptodome" ];
   };
 
 in pkgs.mkShell {
@@ -35,6 +38,5 @@ in pkgs.mkShell {
   buildInputs = [
     pkgs.python310Full
     cython-test
-    pyage
   ];
 }

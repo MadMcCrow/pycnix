@@ -17,7 +17,7 @@ let
   # build time dependencies
   deps = map (x : if isString x then python.pkgs."${x}" else x) libraries;
 
-  depsLibStr = map (x: "-L${x}/lib") deps;
+  depsLibStr = concatStringsSep " " (map (x: "-L${x}/lib") deps);
 
   # If we want to have control over the compilation process
   # We may use this :
@@ -27,7 +27,7 @@ let
   libdir2= "${python}/lib/${pythonVersionText}/config-3.10-x86_64-linux-gnu";
   pylib= "python3.10";
   linkForShared = "-Xlinker -export-dynamic";
-  libs = "-lm -ldl" ;# "-lcrypt -ldl -L${pkgs.libxcrypt}/lib ${depsLibStr} -lm";
+  libs = "-lcrypt -ldl -L${pkgs.libxcrypt}/lib ${depsLibStr} -lm";
   sysLibs = "-lm";
   gcc = pkgs.gcc;
 
@@ -46,6 +46,7 @@ let
   #
 in pkgs.stdenv.mkDerivation {
   inherit name nativeBuildInputs buildInputs;
+  propagatedBuildInputs = nativeBuildInputs;
 
   src = modules;
 
@@ -53,7 +54,6 @@ in pkgs.stdenv.mkDerivation {
     for srcFile in $src; do
     srcList+=$(stripHash $srcFile)
     cp $srcFile $(stripHash $srcFile)
-    ls -la
     done
   '';
 
@@ -62,23 +62,19 @@ in pkgs.stdenv.mkDerivation {
   # instead we do it manually :
   buildPhase = let 
       cythonize = "${cython}/bin/cython -f --embed -o ${name}.c $srcList";
-      cc = "${gcc}/bin/gcc -c ${name}.c -I${incdir} -I${platincdir}";
+      cc = "${gcc}/bin/gcc  -fPIC -c ${name}.c -I${incdir} -I${platincdir}";
       ld = "${gcc}/bin/gcc -o ${name} ${name}.o -L${libdir1} -L${libdir2} -l${pylib} ${libs} ${sysLibs} ${linkForShared}";
     in
   ''
-      ls -la
       echo "${cythonize}"
       ${cythonize}
-      ls -la
       ${cc}
       ${ld}
-      ls -la
   '';
 
   # copy all so files and add our main
   installPhase = ''
     mkdir -p "$out/bin"
     cp ${name} $out/bin/
-    ls -la $out/bin
   '';
 }
