@@ -10,9 +10,10 @@ let
 
 
   # Demo : download a pip command and print all about it :
-  test = pkgs.writeText "test.py" ''
-  from age import cli
-  print( cli.decrypt )
+  test-cython = pkgs.writeText "test.py" ''
+  print(f"name is : {__name__}")
+  import age.file as age
+  print(f"age : {age}")
   '';
 
   pyage = mkPipInstall {
@@ -23,12 +24,12 @@ let
   };
 
   cython-test = mkCythonBin {
-    name = "test-cython";
+    name = "cython-test";
     main = "test";
-    modules = [ test ];
+    modules = [  test-cython ];
     libraries = [ pyage ];
-  
   };
+
 in pkgs.mkShell {
   # nativeBuildInputs is usually what you want -- tools you need to run
   buildInputs = [
