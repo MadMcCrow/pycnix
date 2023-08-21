@@ -22,7 +22,7 @@
       lib = forAllSystems ( pkgs : listToAttrs (
       map (x: {
         name =  elemAt (elemAt (split ".*/.*-(.*)\.nix" "${x}") 1) 0;
-        value = import x pkgs (python pkgs);
+        value = import x pkgs;
         }) modules ));
 
       devShells = forAllSystems (pkgs: {default = import ./shell.nix { inherit pkgs; };});
