@@ -4,7 +4,7 @@
 # usage :
 #   mkPipInstall {name ,version, sha256}
 #   TODO : detect dependencies
-pkgs: python : { name, version, sha256, libraries ? [ ] }:
+pkgs : { python ? pkgs.python310, name, version, sha256, libraries ? [ ] }:
 with builtins;
 let 
 pname = name;

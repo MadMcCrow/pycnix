@@ -1,38 +1,46 @@
 # mkCythonBin.nix
+# parameters :
+#   pkgs    : given by the flake, cannot be used by user
+#   python  : the python version to use
+#   pname, version : mkDerivation arguments (TODO: allow for name/pname automatic dispatch)
 # usage :
-#   mkCythonBin {name = "test"; main =  "test" ; modules = [./test.py];};
+#   mkCythonBin {pname = "test"; version = "0.1", main =  "test" ; modules = [./test.py]; python = pkgs.python3};
 # note :
 #   we could use pkgs.writers.writePython3Bin instead : 
 #   pkgs.writers.writePython3Bin "test" {} (builtins.readFile ./file.py);
-pkgs: python:
-{ name, main, modules, libraries ? [ ] }:
+pkgs:
+{python ? pkgs.python310, name ? "", pname ? "", version ? "", main, modules, libraries ? [ ] }:
 with builtins;
 let
 
+  # programs
+  gcc = pkgs.gcc;
   cython = python.pkgs.cython_3;
+
+  # crossPlatform support
+  isDarwin = pkgs.system == "aarch64-darwin";
   
-  # python3.10
-  pythonVersionText = "${python.executable}";
+  # for example : "3.10" (removes 'python' from 'python3.10')
+  pyVersion = pkgs.lib.strings.removePrefix "python" "${python.executable}";
 
-  # build time dependencies
+  # compilation arguments
+  incdir = "${python}/include/python${pyVersion}";
+  platincdir="${python}/include/python${pyVersion}";
+  libdirBase= "${python}/lib";
+  libdirOS= "${python}/lib/python${pyVersion}/config-${pyVersion}-" + (if isDarwin then "darwin" else "x86_64-linux-gnu");
+  linkForShared =if isDarwin then "" else "-Xlinker -export-dynamic";
   deps = map (x : if isString x then python.pkgs."${x}" else x) libraries;
-
   depsLibStr = concatStringsSep " " (map (x: "-L${x}/lib") deps);
-
-  # If we want to have control over the compilation process
-  # We may use this :
-  incdir = "${python}/include/${pythonVersionText}";
-  platincdir="${python}/include/${pythonVersionText}";
-  libdir1= "${python}/lib";
-  libdir2= "${python}/lib/${pythonVersionText}/config-3.10-x86_64-linux-gnu";
-  pylib= "python3.10";
-  linkForShared = "-Xlinker -export-dynamic";
   libs = "-lcrypt -ldl -L${pkgs.libxcrypt}/lib ${depsLibStr} -lm";
   sysLibs = "-lm";
-  gcc = pkgs.gcc;
+
+  # final commands :
+  cythonize = "${cython}/bin/cython -f --embed -o ${name}.c $srcList";
+  cc = "${gcc}/bin/gcc  -fPIC -c ${name}.c -I${incdir} -I${platincdir}";
+  ld = "${gcc}/bin/gcc -o ${name} ${name}.o -L${libdirBase} -L${libdirOS} -lpython${pyVersion} ${libs} ${sysLibs} ${linkForShared}";
 
 
-
+  # inputs
   nativeBuildInputs = [ python cython pkgs.gcc ] ++ deps;
   buildInputs = [ python ] ++ deps;     # run-time dependencies
 
@@ -44,9 +52,9 @@ let
   #   - a list of modules to compile
   #   - potential libraries to append (not tested)
   #
-in pkgs.stdenv.mkDerivation {
-  inherit name nativeBuildInputs buildInputs;
-  propagatedBuildInputs = nativeBuildInputs;
+in pkgs.stdenv.mkDerivation ({
+  inherit version nativeBuildInputs buildInputs;
+  propagatedBuildInputs = buildInputs;
 
   src = modules;
 
@@ -57,18 +65,13 @@ in pkgs.stdenv.mkDerivation {
     done
   '';
 
-  # cythonize everything, no need for manual gcc :
+  # we could cythonize everything, no need for manual gcc :
   # ${cython}/bin/cythonize --embed -if3 --no-docstrings *.py
   # instead we do it manually :
-  buildPhase = let 
-      cythonize = "${cython}/bin/cython -f --embed -o ${name}.c $srcList";
-      cc = "${gcc}/bin/gcc  -fPIC -c ${name}.c -I${incdir} -I${platincdir}";
-      ld = "${gcc}/bin/gcc -o ${name} ${name}.o -L${libdir1} -L${libdir2} -l${pylib} ${libs} ${sysLibs} ${linkForShared}";
-    in
-  ''
-      echo "${cythonize}"
+  buildPhase = ''
       ${cythonize}
       ${cc}
+      echo "${ld}"
       ${ld}
   '';
 
@@ -77,4 +80,4 @@ in pkgs.stdenv.mkDerivation {
     mkdir -p "$out/bin"
     cp ${name} $out/bin/
   '';
-}
+} //( if name != "" then {inherit name;} else if  pname != "" then {inherit pname; } else throw "you must either define pname and version or name" ))

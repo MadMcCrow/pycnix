@@ -14,10 +14,6 @@
         nixpkgs.lib.genAttrs  systems
         (system: function nixpkgs.legacyPackages.${system});
 
-
-      # python version to use :
-      python = pkgs : pkgs.python310;
-
       # sub modules
       modules = [./mkCythonBin.nix ./mkPipInstall.nix ];
 
