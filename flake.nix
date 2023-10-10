@@ -8,23 +8,26 @@
     with builtins;
     let
       # support systems
-      systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin"];
+      systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
 
-      forAllSystems = function :
-        nixpkgs.lib.genAttrs  systems
+      forAllSystems = function:
+        nixpkgs.lib.genAttrs systems
         (system: function nixpkgs.legacyPackages.${system});
 
       # sub modules
-      modules = [./mkCythonBin.nix ./mkPipInstall.nix ];
+      modules = [ ./mkCythonBin.nix ./mkPipInstall.nix ./mkCxFreezeBin.nix ];
 
-    in 
-    {
-      lib = forAllSystems ( pkgs : listToAttrs (
-      map (x: {
-        name =  elemAt (elemAt (split ".*/.*-(.*)\.nix" "${x}") 1) 0;
-        value = import x pkgs;
-        }) modules ));
+    in {
 
-      devShells = forAllSystems (pkgs: {default = import ./shell.nix { inherit pkgs; };});
+      # expose function
+      lib = forAllSystems (pkgs:
+        listToAttrs (map (x: {
+          name = elemAt (elemAt (split ".*/.*-(.*).nix" "${x}") 1) 0;
+          value = import x pkgs;
+        }) modules));
+
+      # shell for testing and develop pycnix
+      devShells = forAllSystems
+        (pkgs: { default = import ./shell.nix { inherit pkgs; }; });
     };
 }
