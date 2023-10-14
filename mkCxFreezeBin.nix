@@ -38,10 +38,11 @@ in pkgs.stdenv.mkDerivation ({
   nativeBuildInputs = nativeBuildInputs
   ++ [ python.pkgs.cx_Freeze ];
   unpackPhase = "
-  cp -r $src ./ 
+  cp -r $src/* ./ 
   ls -la
   ";
   buildPhase = ''
+    ls -la ./
     mkdir -p ./${buildPath}
     ${python.pkgs.cx_Freeze}/bin/cxfreeze -c ${main} ${includes} --target-name=${outbin} --target-dir=./${buildPath}
   '';
