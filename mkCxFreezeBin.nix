@@ -7,6 +7,7 @@
 #   buildPath : where to build, only modify if your sources already contains a folder name build 
 pkgs:
 { python ? pkgs.python311
+, src
 , main
 , modules
 , buildPath ? "build"
@@ -28,27 +29,41 @@ let
     "nativeBuildInputs"
   ];
 
+  # a fixed freezer that won't complain about dates being before 1980 (store is epoch)
+  freezer = python.pkgs.cx_Freeze.overrideAttrs (final: prev: {
+  postInstall =  ''
+  substituteInPlace $out/lib/python3.11/site-packages/cx_Freeze/freezer.py \
+  --replace "mtime = int(file_stat.st_mtime) & 0xFFFF_FFFF" "mtime = int(time.time()) & 0xFFFF_FFFF"
+  '';
+  });
+
   # include command for cxfreeze
   includes = if (length modules) > 0 then 
   "--includes ${concatStringsSep "," modules}"
   else "";
 
-  # implementation
+
+# implementation
 in pkgs.stdenv.mkDerivation ({
   nativeBuildInputs = nativeBuildInputs
-  ++ [ python.pkgs.cx_Freeze ];
-  unpackPhase = "
-  cp -r $src/* ./ 
-  ls -la
-  ";
+  ++ [ freezer ];
+  # unpack files and folders alike !
+  unpackPhase = ''
+    if [ -d $src ]; then
+      cp -r $src/* ./
+    else 
+      cp $src ./$(stripHash $src)
+    fi
+    touch -a -m ./*
+  '';
+
   buildPhase = ''
-    ls -la ./
+    ls -la
     mkdir -p ./${buildPath}
-    ${python.pkgs.cx_Freeze}/bin/cxfreeze -c ${main} ${includes} --target-name=${outbin} --target-dir=./${buildPath}
+    ${freezer}/bin/cxfreeze -c ${main} ${includes} --target-name=${outbin} --target-dir=./${buildPath}
   '';
   installPhase = ''
     mkdir -p $out/bin
-    ls -la ./${buildPath}
     cp -r ./${buildPath}/* $out/bin
   '';
 } // buildArgs)

@@ -12,7 +12,7 @@ let
 
   # Demo :
   # print infos about a pip library and a system library
-  test-cython = pkgs.writeText "test.py" ''
+  testScript = pkgs.writeText "test.py" ''
     print(f"name is : {__name__}")
     import age.file as age
     print(f"age : {age}")
@@ -41,15 +41,15 @@ let
     inherit python;
     name = "cython-test";
     main = "test";
-    modules = [ test-cython ];
+    modules = [ testScript ];
     libraries = [ pyage "pycryptodome" ];
   };
 
   cxfreeze-test = mkCxFreezeBin {
     inherit python;
     name = "cxfreeze-test";
-    src = test-cython;
-    main = "${test-cython}";
+    src = testScript;
+    main = "${testScript}";
     modules = [ "Crypto" "age"];
     nativeBuildInputs = [pycrypto pyage];
   };
