@@ -14,4 +14,4 @@ in python.pkgs.buildPythonPackage {
   inherit version pname;
   src = python.pkgs.fetchPypi { inherit pname version sha256; };
   propagatedBuildInputs = deps;
-} 
+}

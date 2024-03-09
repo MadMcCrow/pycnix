@@ -2,13 +2,14 @@
 # demo and test functions from our library
 { pkgs ? import <nixpkgs> { } }:
 let
+  inherit (pkgs) lib;
   # shell.nix
   python = pkgs.python311;
 
   # our functions
   mkCythonBin = import ./mkCythonBin.nix pkgs;
   mkPipInstall = import ./mkPipInstall.nix pkgs;
-  mkCxFreezeBin = import ./mkCxFreezeBin.nix pkgs;
+  mkCxFreezeBin = import ./mkCxFreezeBin.nix { inherit pkgs lib; };
 
   # Demo :
   # print infos about a pip library and a system library
@@ -50,8 +51,8 @@ let
     name = "cxfreeze-test";
     src = testScript;
     main = "${testScript}";
-    modules = [ "Crypto" "age"];
-    nativeBuildInputs = [pycrypto pyage];
+    includes = [ "Crypto" "age" ];
+    nativeBuildInputs = [ pycrypto pyage ];
   };
 
   # make a shell with it
