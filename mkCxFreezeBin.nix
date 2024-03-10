@@ -17,11 +17,11 @@ let
     '';
   });
 
-  # implementation
-in { src, includes, main, ... }@args:
-(pkgs.stdenv.mkDerivation args).overrideAttrs (prev: {
-  nativeBuildInputs = prev.nativeBuildInputs ++ [ freezer ];
-
+# implementation
+in { pname, version, src, includes, main ? "__main__.py", nativeBuildInputs ? [] } : pkgs.stdenv.mkDerivation {
+  inherit pname version src;
+  nativeBuildInputs = nativeBuildInputs ++ [ freezer ];
+  # buildInputs = libs; # dependencies must be included in the freeze
   # unpack files and folders alike !
   unpackPhase = ''
     if [ -d $src ]; then
@@ -34,19 +34,22 @@ in { src, includes, main, ... }@args:
 
   buildPhase = ''
     mkdir -p ./build
-    ${freezer}/bin/cxfreeze -c ${main} ${
+    ${freezer}/bin/cxfreeze ${main} ${
       if (length includes) > 0 then
         "--includes ${concatStringsSep "," includes}"
       else
         ""
-    }\
-    --target-name=${
-      if prev ? pname then prev.pname else lib.strings.getName (prev.name)
-    } --target-dir=./build
+    } \
+    --zip-include-packages=* \
+    --target-name=${pname}   \
+    --target-dir=./build     \
+    --compress -s
   '';
 
-  installPhase = lib.strings.concatLines [
-    (lib.strings.optionalString (prev ? installPhase) prev.installPhase)
-    "install -m755 -D ./build/* $out/bin"
-  ];
-})
+  installPhase = ''
+  dasdaw
+  #install -Dm 755 ./build/${pname} $out/bin/${pname}
+  mkdir -p $out/bin
+  cp -r ./build/* $out/bin
+  '';
+}

@@ -47,8 +47,8 @@ let
   };
 
   cxfreeze-test = mkCxFreezeBin {
-    inherit python;
-    name = "cxfreeze-test";
+    pname = "cxfreeze-test";
+    version = "0.01";
     src = testScript;
     main = "${testScript}";
     includes = [ "Crypto" "age" ];
