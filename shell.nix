@@ -9,7 +9,7 @@ let
   # our functions
   mkCythonBin = import ./mkCythonBin.nix pkgs;
   mkPipInstall = import ./mkPipInstall.nix pkgs;
-  mkCxFreezeBin = import ./mkCxFreezeBin.nix { inherit pkgs lib; };
+  mkCxFreezeBin = import ./mkCxFreezeBin.nix { inherit pkgs; };
 
   # Demo :
   # print infos about a pip library and a system library
@@ -47,6 +47,15 @@ let
   };
 
   cxfreeze-test = mkCxFreezeBin {
+    pname = "cxfreeze-test";
+    version = "0.01";
+    src = testScript;
+    main = "${testScript}";
+    includes = [ "Crypto" "age" ];
+    nativeBuildInputs = [ pycrypto pyage ];
+  };
+
+  pyinstaller-test = mkCxFreezeBin {
     pname = "cxfreeze-test";
     version = "0.01";
     src = testScript;

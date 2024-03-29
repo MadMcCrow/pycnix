@@ -15,7 +15,12 @@
         (system: function nixpkgs.legacyPackages.${system});
 
       # sub modules
-      modules = [ ./mkCythonBin.nix ./mkPipInstall.nix ./mkCxFreezeBin.nix ];
+      modules = [
+        ./mkCythonBin.nix
+        ./mkPipInstall.nix
+        ./mkCxFreezeBin.nix
+        ./mkPyInstaller.nix
+      ];
 
     in {
 

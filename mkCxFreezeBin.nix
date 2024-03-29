@@ -3,9 +3,9 @@
 #   pkgs      : given by the flake, cannot be used by user
 #   python    : the python version to use
 #   main      : the main python file
-#   modules   : python modules to include (list of strings)
-#   buildPath : where to build, only modify if your sources already contains a folder name build 
-{ pkgs, lib, python ? pkgs.python311, ... }@args:
+pkgs:
+{ python ? pkgs.python311, includes, main ? "__main__.py"
+, nativeBuildInputs ? [ ] }@args:
 with builtins;
 let
 
@@ -17,9 +17,8 @@ let
     '';
   });
 
-# implementation
-in { pname, version, src, includes, main ? "__main__.py", nativeBuildInputs ? [] } : pkgs.stdenv.mkDerivation {
-  inherit pname version src;
+  # implementation
+in pkgs.stdenv.mkDerivation (args // {
   nativeBuildInputs = nativeBuildInputs ++ [ freezer ];
   # buildInputs = libs; # dependencies must be included in the freeze
   # unpack files and folders alike !
@@ -47,9 +46,8 @@ in { pname, version, src, includes, main ? "__main__.py", nativeBuildInputs ? []
   '';
 
   installPhase = ''
-  dasdaw
-  #install -Dm 755 ./build/${pname} $out/bin/${pname}
-  mkdir -p $out/bin
-  cp -r ./build/* $out/bin
+    install -Dm 755 ./build/${pname} $out/bin/${pname}
+    mkdir -p $out/bin
+    cp -r ./build/* $out/bin
   '';
-}
+})
