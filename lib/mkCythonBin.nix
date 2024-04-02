@@ -59,10 +59,12 @@ in pkgs.stdenv.mkDerivation (args // rec {
 
   # unpack stuff :
   unpackPhase = ''
-    for srcFile in $src; do
-    srcList+=$(stripHash $srcFile)
-    cp $srcFile $(stripHash $srcFile)
-    done
+    if [ -d $src ]; then
+      cp -r $src/* ./
+    else 
+      cp $src ./$(stripHash $src)
+    fi
+    find . -type f -exec touch -a -m {} +
   '';
 
   # we could cythonize everything, no need for manual gcc :
