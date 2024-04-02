@@ -4,16 +4,14 @@
 #   python  : the python version to use
 #   pname, version : mkDerivation arguments
 # usage :
-#   mkCythonBin {pname = "test"; version = "0.1", main =  "test" ; modules = [./test.py]; python = pkgs.python3};
+#   mkCythonBin {pname = "test"; version = "0.1", main =  "test" ; python = pkgs.python3};
 # note :
 #   we could use pkgs.writers.writePython3Bin instead : 
 #   pkgs.writers.writePython3Bin "test" {} (builtins.readFile ./file.py);
 pkgs:
-{ python ? pkgs.python311, name ? "", pname ? "", version ? "0.0.1", main
-, modules, libraries ? [ ] }:
-with builtins;
+{ python ? pkgs.python311, main, src, libraries ? [ ], nativeBuildInputs ? [ ]
+, ... }@args:
 let
-
   # programs
   gcc = pkgs.gcc;
   cython = python.pkgs.cython_3;
@@ -33,20 +31,11 @@ let
   linkForShared = if isDarwin then "" else "-Xlinker -export-dynamic";
 
   # dependancies
-  deps = map (x: if isString x then python.pkgs."${x}" else x) libraries;
-  depsLibStr = concatStringsSep " " (map (x: "-L${x}/lib") deps);
+  deps =
+    map (x: if builtins.isString x then python.pkgs."${x}" else x) libraries;
+  depsLibStr = builtins.concatStringsSep " " (map (x: "-L${x}/lib") deps);
   libs = "-lcrypt -ldl -L${pkgs.libxcrypt}/lib ${depsLibStr} -lm";
   sysLibs = "-lm";
-
-  # final commands :
-  cythonize = "${cython}/bin/cython -f --embed -o ${name}.c $srcList";
-  cc = "${gcc}/bin/gcc  -fPIC -c ${name}.c -I${incdir} -I${platincdir}";
-  ld =
-    "${gcc}/bin/gcc -o ${name} ${name}.o -L${libdirBase} -L${libdirOS} -lpython${pyVersion} ${libs} ${sysLibs} ${linkForShared}";
-
-  # inputs
-  nativeBuildInputs = [ python cython pkgs.gcc ] ++ deps;
-  buildInputs = [ python ] ++ deps; # run-time dependencies
 
   # Create an executable Compiled Python script
   # Takes a attrs with : 
@@ -55,13 +44,20 @@ let
   #   - a list of modules to compile
   #   - potential libraries to append (not tested)
   #
-in pkgs.stdenv.mkDerivation ({
-  inherit nativeBuildInputs buildInputs version;
+in pkgs.stdenv.mkDerivation (args // rec {
+  inherit src;
+  pname = if args ? "pname" then
+    args.pname
+  else
+    (builtins.parseDrvName args.name).name;
+
+  # dependencies :
+  nativeBuildInputs = [ python cython pkgs.gcc ] ++ deps;
+  buildInputs = [ python ] ++ deps;
   propagatedBuildInputs = nativeBuildInputs;
   runtimeDependencies = deps;
 
-  src = modules;
-
+  # unpack stuff :
   unpackPhase = ''
     for srcFile in $src; do
     srcList+=$(stripHash $srcFile)
@@ -73,20 +69,24 @@ in pkgs.stdenv.mkDerivation ({
   # ${cython}/bin/cythonize --embed -if3 --no-docstrings *.py
   # instead we do it manually :
   buildPhase = ''
-    ${cythonize}
-    ${cc}
-    echo "${ld}"
-    ${ld}
+    # cythonize
+    ${cython}/bin/cython -f --embed -o ${pname}.c $srcList
+    # CC
+    ${gcc}/bin/gcc  -fPIC -c ${pname}.c \
+    -I${incdir} -I${platincdir}
+    # LD
+    ${gcc}/bin/gcc -o ${pname} ${pname}.o \
+    -L${libdirBase} -L${libdirOS} \
+    -lpython${pyVersion} ${libs} ${sysLibs} \
+    ${linkForShared}
   '';
 
   # copy the resulting binary
   installPhase = ''
-    mkdir -p "$out/bin"
-    cp ${name} $out/bin/
+    install -Dm 755 ${pname} $out/bin/${pname}
+    cp ${pname} $out/bin/
   '';
-} // (if name != "" then {
-  inherit name;
-} else if pname != "" then {
-  inherit pname;
-} else
-  throw "you must either define pname and version or name"))
+
+  # for lib.getExe
+  meta.mainProgram = "$out/bin/${name}";
+})

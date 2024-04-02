@@ -9,7 +9,7 @@ let
   # our functions
   mkCythonBin = import ./mkCythonBin.nix pkgs;
   mkPipInstall = import ./mkPipInstall.nix pkgs;
-  mkCxFreezeBin = import ./mkCxFreezeBin.nix { inherit pkgs; };
+  mkCxFreezeBin = import ./mkCxFreezeBin.nix pkgs;
 
   # Demo :
   # print infos about a pip library and a system library
@@ -40,9 +40,10 @@ let
   # build to a binary
   cython-test = mkCythonBin {
     inherit python;
-    name = "cython-test";
+    pname = "cython-test";
+    version = "0.1";
     main = "test";
-    modules = [ testScript ];
+    src = testScript;
     libraries = [ pyage "pycryptodome" ];
   };
 
@@ -65,4 +66,4 @@ let
   };
 
   # make a shell with it
-in pkgs.mkShell { buildInputs = [ cxfreeze-test ]; }
+in pkgs.mkShell { buildInputs = [ ]; }

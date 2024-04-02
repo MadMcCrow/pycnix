@@ -1,0 +1,8 @@
+# ignore any result from flake evaluation :
+result
+
+# ignore macos files
+**/.DS_Store
+
+# ignore any python cache
+**/__pycache__/

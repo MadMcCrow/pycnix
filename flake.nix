@@ -31,6 +31,13 @@
           value = import x pkgs;
         }) modules));
 
+      packages = forAllSystems (pkgs: {
+        pyinstaller = import ./pyinstaller.nix {
+          inherit pkgs;
+          python = pkgs.python3;
+        };
+      });
+
       # shell for testing and develop pycnix
       devShells = forAllSystems
         (pkgs: { default = import ./shell.nix { inherit pkgs; }; });

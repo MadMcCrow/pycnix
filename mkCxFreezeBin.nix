@@ -1,12 +1,10 @@
-# mkCythonBin.nix
+# mkCxFreezBin.nix
 # parameters :
 #   pkgs      : given by the flake, cannot be used by user
 #   python    : the python version to use
 #   main      : the main python file
 pkgs:
-{ python ? pkgs.python311, includes, main ? "__main__.py"
-, nativeBuildInputs ? [ ] }@args:
-with builtins;
+{ python ? pkgs.python311, includes, main ? "__main__.py", ... }@args:
 let
 
   # a fixed freezer that won't complain about dates being before 1980 (store is epoch)
@@ -18,8 +16,17 @@ let
   });
 
   # implementation
-in pkgs.stdenv.mkDerivation (args // {
-  nativeBuildInputs = nativeBuildInputs ++ [ freezer ];
+in pkgs.stdenv.mkDerivation (args // rec {
+
+  # extract pname from args 
+  pname = if args ? "pname" then
+    args.pname
+  else
+    (builtins.parseDrvName args.name).name;
+
+  nativeBuildInputs = [ freezer ]
+    ++ (pkgs.lib.lists.optionals (args ? nativeBuildInputs)
+      args.nativeBuildInputs);
   # buildInputs = libs; # dependencies must be included in the freeze
   # unpack files and folders alike !
   unpackPhase = ''
@@ -34,8 +41,8 @@ in pkgs.stdenv.mkDerivation (args // {
   buildPhase = ''
     mkdir -p ./build
     ${freezer}/bin/cxfreeze ${main} ${
-      if (length includes) > 0 then
-        "--includes ${concatStringsSep "," includes}"
+      if (builtins.length includes) > 0 then
+        "--includes ${builtins.concatStringsSep "," includes}"
       else
         ""
     } \
@@ -46,7 +53,6 @@ in pkgs.stdenv.mkDerivation (args // {
   '';
 
   installPhase = ''
-    install -Dm 755 ./build/${pname} $out/bin/${pname}
     mkdir -p $out/bin
     cp -r ./build/* $out/bin
   '';
