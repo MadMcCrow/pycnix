@@ -7,9 +7,9 @@ let
   python = pkgs.python311;
 
   # our functions
-  mkCythonBin = import ./mkCythonBin.nix pkgs;
-  mkPipInstall = import ./mkPipInstall.nix pkgs;
-  mkCxFreezeBin = import ./mkCxFreezeBin.nix pkgs;
+  mkCythonBin = import ./lib/mkCythonBin.nix pkgs;
+  mkPipInstall = import ./lib/mkPipInstall.nix pkgs;
+  mkCxFreezeBin = import ./lib/mkCxFreezeBin.nix pkgs;
 
   # Demo :
   # print infos about a pip library and a system library
@@ -40,9 +40,14 @@ let
   # build to a binary
   cython-test = mkCythonBin {
     inherit python;
+    unpackPhase = ''
+      for srcFile in $src; do
+      srcList+=$(stripHash $srcFile)
+      cp $srcFile $(stripHash $srcFile)
+      done
+    '';
     pname = "cython-test";
     version = "0.1";
-    main = "test";
     src = testScript;
     libraries = [ pyage "pycryptodome" ];
   };
@@ -61,9 +66,17 @@ let
     version = "0.01";
     src = testScript;
     main = "${testScript}";
+    unpackPhase = ''
+      if [ -d $src ]; then
+        cp -r $src/* ./
+      else 
+        cp $src ./$(stripHash $src)
+      fi
+      find . -type f -exec touch -a -m {} +
+    '';
     includes = [ "Crypto" "age" ];
     nativeBuildInputs = [ pycrypto pyage ];
   };
 
   # make a shell with it
-in pkgs.mkShell { buildInputs = [ ]; }
+in pkgs.mkShell { buildInputs = [  cython-test  ]; }

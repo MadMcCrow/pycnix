@@ -29,14 +29,6 @@ in pkgs.stdenv.mkDerivation (args // rec {
       args.nativeBuildInputs);
   # buildInputs = libs; # dependencies must be included in the freeze
   # unpack files and folders alike !
-  unpackPhase = ''
-    if [ -d $src ]; then
-      cp -r $src/* ./
-    else 
-      cp $src ./$(stripHash $src)
-    fi
-    find . -type f -exec touch -a -m {} +
-  '';
 
   buildPhase = ''
     mkdir -p ./build

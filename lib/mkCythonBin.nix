@@ -4,12 +4,9 @@
 #   python  : the python version to use
 #   pname, version : mkDerivation arguments
 # usage :
-#   mkCythonBin {pname = "test"; version = "0.1", main =  "test" ; python = pkgs.python3};
-# note :
-#   we could use pkgs.writers.writePython3Bin instead : 
-#   pkgs.writers.writePython3Bin "test" {} (builtins.readFile ./file.py);
+#   mkCythonBin {pname = "test"; version = "0.1" ; python = pkgs.python3;};
 pkgs:
-{ python ? pkgs.python311, main, src, libraries ? [ ], nativeBuildInputs ? [ ]
+{ python ? pkgs.python311, src, libraries ? [ ], nativeBuildInputs ? [ ]
 , ... }@args:
 let
   # programs
@@ -40,8 +37,6 @@ let
   # Create an executable Compiled Python script
   # Takes a attrs with : 
   #   - a name ( for the derivation )
-  #   - a main module name (usually your script without the .py)
-  #   - a list of modules to compile
   #   - potential libraries to append (not tested)
   #
 in pkgs.stdenv.mkDerivation (args // rec {
@@ -57,20 +52,11 @@ in pkgs.stdenv.mkDerivation (args // rec {
   propagatedBuildInputs = nativeBuildInputs;
   runtimeDependencies = deps;
 
-  # unpack stuff :
-  unpackPhase = ''
-    if [ -d $src ]; then
-      cp -r $src/* ./
-    else 
-      cp $src ./$(stripHash $src)
-    fi
-    find . -type f -exec touch -a -m {} +
-  '';
-
   # we could cythonize everything, no need for manual gcc :
   # ${cython}/bin/cythonize --embed -if3 --no-docstrings *.py
   # instead we do it manually :
   buildPhase = ''
+    srcList=$(find . -iname "*.py")
     # cythonize
     ${cython}/bin/cython -f --embed -o ${pname}.c $srcList
     # CC
@@ -86,6 +72,7 @@ in pkgs.stdenv.mkDerivation (args // rec {
   # copy the resulting binary
   installPhase = ''
     install -Dm 755 ${pname} $out/bin/${pname}
+
   '';
 
   # for lib.getExe
