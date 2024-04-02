@@ -33,9 +33,10 @@ in python.pkgs.buildPythonPackage rec {
       matplotlib
     ]) ++ (pkgs.lib.lists.optionals (pkgs.stdenv.isDarwin)
       [ pkgs.darwin.binutils ])
-     ++ (pkgs.lib.lists.optionals (pkgs.stdenv.isLinux) 
-     [pkgs.binutils pkgs.glibc]);
-
+    ++ (pkgs.lib.lists.optionals (pkgs.stdenv.isLinux) [
+      pkgs.binutils
+      pkgs.glibc
+    ]);
 
   dontUseSetuptoolsCheck = true;
   # for lib.getExe

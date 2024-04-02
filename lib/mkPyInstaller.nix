@@ -4,7 +4,7 @@ pkgs:
 { python ? pkgs.python311, main ? __main__.py, nativeBuildInputs ? [ ], ...
 }@args:
 let
-  pyinstaller = import ./pyinstaller.nix { inherit pkgs python; };
+  pyinstaller = import ../packages/pyinstaller.nix { inherit pkgs python; };
   # remove things stdenv does not care about
   derivationArgs = builtins.removeAttrs args [ "python" "main" ];
   # package stuff :

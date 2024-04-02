@@ -16,15 +16,15 @@
 
       # sub modules
       modules = [
-        ./mkCythonBin.nix
-        ./mkPipInstall.nix
-        ./mkCxFreezeBin.nix
-        ./mkPyInstaller.nix
+        ./lib/mkCythonBin.nix
+        ./lib/mkPipInstall.nix
+        ./lib/mkCxFreezeBin.nix
+        ./lib/mkPyInstaller.nix
       ];
 
     in {
 
-      # expose function
+      # expose functions
       lib = forAllSystems (pkgs:
         listToAttrs (map (x: {
           name = elemAt (elemAt (split ".*/.*-(.*).nix" "${x}") 1) 0;
@@ -32,7 +32,7 @@
         }) modules));
 
       packages = forAllSystems (pkgs: {
-        pyinstaller = import ./pyinstaller.nix {
+        pyinstaller = import ./packages/pyinstaller.nix {
           inherit pkgs;
           python = pkgs.python3;
         };
