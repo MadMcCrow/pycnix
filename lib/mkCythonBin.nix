@@ -84,9 +84,8 @@ in pkgs.stdenv.mkDerivation (args // rec {
   # copy the resulting binary
   installPhase = ''
     install -Dm 755 ${pname} $out/bin/${pname}
-    cp ${pname} $out/bin/
   '';
 
   # for lib.getExe
-  meta.mainProgram = "$out/bin/${name}";
+  meta.mainProgram = "$out/bin/${pname}";
 })
