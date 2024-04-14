@@ -76,5 +76,5 @@ in pkgs.stdenv.mkDerivation (args // rec {
   '';
 
   # for lib.getExe
-  meta.mainProgram = "$out/bin/${pname}";
+  meta.mainProgram = "${pname}";
 })
