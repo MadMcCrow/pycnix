@@ -4,10 +4,27 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    # pyproject helps build python apps
+    pyproject-nix = {
+      url = "github:pyproject-nix/pyproject.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # uv 2 nix allows creating a whole workspace of projects
+    uv2nix = {
+      url = "github:pyproject-nix/uv2nix";
+      inputs.pyproject-nix.follows = "pyproject-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    { self, nixpkgs, ... }@inputs:
+    {
+      self,
+      nixpkgs,
+      pyproject-nix,
+      uv2nix,
+      ...
+    }@inputs:
     let
       # support systems
       systems = [
@@ -22,6 +39,7 @@
           inherit system;
           pkgs = nixpkgs.legacyPackages.${system};
           inherit (nixpkgs) lib;
+          inherit pyproject-nix uv2nix self;
         };
     in
     # for each supported system

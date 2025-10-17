@@ -1,7 +1,7 @@
 # TODO :
 
 ## nix
- - [ ] working flake
+ - [X] working flake
  - [ ] nix lib
  - [ ] python packages
  - [ ] automatic checks
