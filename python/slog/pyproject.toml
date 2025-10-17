@@ -1,0 +1,18 @@
+[project]
+name = "slog"
+version = "0.1.0"
+description = "simple module to write simplified logs"
+authors = [{ name = "MadMcCrow", email = "do-not-mail.me@please.com" }]
+requires-python = "~=3.11"
+readme = "slog.md"
+dependencies = ["rich"]
+
+[tool.hatch.build.targets.sdist]
+include = ["slog"]
+
+[tool.hatch.build.targets.wheel]
+include = ["slog"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
