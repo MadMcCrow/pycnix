@@ -1,7 +1,7 @@
 # wrap pkgs into apps :
-{ pkgs, ... }:
+{ python311, ... }:
 let
-  python = pkgs.python312;
+  python = python311;
 in
 {
   #pysubfixer :

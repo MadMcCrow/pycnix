@@ -18,21 +18,10 @@
 
       flake =
         system:
-        let
+        import ./nix {
+          inherit system;
           pkgs = nixpkgs.legacyPackages.${system};
-        in
-        {
-          packages.${system} = builtins.listToAttrs (
-            map (x: {
-              name = x;
-              value = pythonOverride (builtins.getAttr x pkgs);
-            }) pythons
-          );
-
-          # shell for testing and develop pycnix
-          devShells = forAllSystems (pkgs: {
-            default = import ./shell.nix { inherit pkgs; };
-          });
+          inherit (nixpkgs) lib;
         };
     in
     # for each supported system
