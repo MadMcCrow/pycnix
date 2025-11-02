@@ -21,6 +21,7 @@ gui = { workspace = true }
 cli = { workspace = true }
 ffmpy = { path="../ffmpy", editable=true }
 pycall = { path="../pycall", editable=true }
+slog = { path="../slog", editable=true }
 
 [tool.uv.workspace]
 members = ["packages/*"]

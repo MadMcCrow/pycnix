@@ -1,6 +1,9 @@
 #! /usr/env python
 # run pysubfixer
 
+# import our log 
+from slog import initialize
+
 def pysubfixercli() :
     from cli import pysubfixer_cli
     pysubfixer_cli()
