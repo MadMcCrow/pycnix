@@ -1,11 +1,5 @@
 # ignore any result from flake evaluation :
-result
+result/
 
 # ignore macos files
-**/.DS_Store
-
-# python build folders
-dist
-build
-*/__pycache__
-*.spec
+.DS_Store

@@ -1,0 +1,30 @@
+[project]
+name = "pysubfixer"
+version = "0.1.0"
+description = "tool to change embedded subtitles"
+authors = [{ name = "MadMcCrow", email = "do-not-mail.me@please.com" }]
+requires-python = "~=3.11"
+readme = "README.md"
+dependencies = ["pycall>=0.1,<0.2", "gui", "cli"]
+
+[project.scripts]
+pysubfixer-cli = "pysubfixer:pysubfixercli"
+
+[project.gui-scripts]
+pysubfixer-gui = "pysubfixer:pysubfixergui"
+
+[tool.uv]
+compile-bytecode = true
+
+[tool.uv.sources]
+gui = { workspace = true }
+cli = { workspace = true }
+ffmpy = { path="../ffmpy", editable=true }
+pycall = { path="../pycall", editable=true }
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[build-system]
+requires = ["uv_build>=0.9.5,<0.10.0"]
+build-backend = "uv_build"

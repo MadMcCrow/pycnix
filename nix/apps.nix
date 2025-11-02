@@ -1,16 +1,16 @@
 # wrap pkgs into apps :
-{ python311, ... }:
+{ ... } @args :
 let
-  python = python311;
+  packages = import ./packages.nix args;
 in
 {
   #pysubfixer :
   pysubfixer-gui = {
     type = "app";
-    program = "${python.pysubfixer}/bin/pysubfixer-gui";
+    program = "${packages.pysubfixer}/bin/pysubfixer-gui";
   };
   pysubfixer-cli = {
     type = "app";
-    program = "${python.pysubfixer}/bin/pysubfixer-cli";
+    program = "${packages.pysubfixer}/bin/pysubfixer-cli";
   };
 }

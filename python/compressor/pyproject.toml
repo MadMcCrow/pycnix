@@ -1,0 +1,21 @@
+[project]
+name = "compressor"
+version = "0.1.0"
+description = "tool to change embedded subtitles"
+authors = [{ name = "MadMcCrow", email = "do-not-mail.me@please.com" }]
+requires-python = "~=3.11"
+readme = "docs/README.md"
+dependencies = [ ]
+
+[project.scripts]
+compressor = "compressor:__main__"
+
+[dependency-groups]
+cli = ["rich"]
+gui = ["PySide6>=6.0.0,<7"]
+
+[tool.uv]
+default-groups = [
+    "cli",
+    "gui"
+]

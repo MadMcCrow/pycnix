@@ -1,47 +1,44 @@
-# pycnix (picnics) is a simple flake to help package and run python scripts
 {
-  description = "pycnix, collection of python helper functions";
+  description = "Develop Python on Nix with uv";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    # pyproject helps build python apps
+
     pyproject-nix = {
       url = "github:pyproject-nix/pyproject.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # uv 2 nix allows creating a whole workspace of projects
+
     uv2nix = {
       url = "github:pyproject-nix/uv2nix";
       inputs.pyproject-nix.follows = "pyproject-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    pyproject-build-systems = {
+      url = "github:pyproject-nix/build-system-pkgs";
+      inputs.pyproject-nix.follows = "pyproject-nix";
+      inputs.uv2nix.follows = "uv2nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
   outputs =
     {
-      self,
       nixpkgs,
       pyproject-nix,
       uv2nix,
+      pyproject-build-systems,
+      self,
       ...
     }@inputs:
     let
-      # support systems
-      systems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "aarch64-darwin"
-      ];
-
-      flake =
-        system:
-        import ./nix {
-          inherit system;
-          pkgs = nixpkgs.legacyPackages.${system};
-          inherit (nixpkgs) lib;
-          inherit pyproject-nix uv2nix self;
-        };
+      inherit (nixpkgs) lib;
+      forAllSystems = nixpkgs.lib.genAttrs lib.systems.flakeExposed;
     in
-    # for each supported system
-    builtins.foldl' (x: y: nixpkgs.lib.recursiveUpdate x y) { } (map flake systems);
+    {
+
+      packages = forAllSystems (system: import ./nix/packages.nix (inputs // { inherit system lib; }));
+      apps = forAllSystems (system: import ./nix/apps.nix (inputs // { inherit system lib; }));
+    };
 }

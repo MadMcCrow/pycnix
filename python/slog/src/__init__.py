@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 # import our initialization method
 from .slog import initialize

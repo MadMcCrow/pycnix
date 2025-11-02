@@ -1,0 +1,12 @@
+pyproject.toml
+src/gui/__init__.py
+src/gui/ffmpeg_button.py
+src/gui/form_widget.py
+src/gui/main_window.py
+src/gui/numeric_widget.py
+src/gui/path_widget.py
+src/gui.egg-info/PKG-INFO
+src/gui.egg-info/SOURCES.txt
+src/gui.egg-info/dependency_links.txt
+src/gui.egg-info/requires.txt
+src/gui.egg-info/top_level.txt

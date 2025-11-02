@@ -1,0 +1,23 @@
+version = 1
+requires-python = ">=3.11, <4"
+
+[[package]]
+name = "ffmpy"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "pycall" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pycall", editable = "../pycall" }]
+
+[[package]]
+name = "pycall"
+version = "0.1.0"
+source = { editable = "../pycall" }
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+richtext = [{ name = "rich" }]
