@@ -8,7 +8,7 @@ readme = "README.md"
 dependencies = ["pycall >= 0.0", "slog >= 0.0", "nixconfig" ]
 
 [project.scripts]
-nixos-pyinstall = "nixos-pyinstall:nixos-pyinstall"
+nixos-pyinstall = "nixos_pyinstall:main"
 
 [project.gui-scripts]
 nixos-pyinstall-gui = "gui:nixos-pyinstall-gui"
@@ -19,6 +19,7 @@ compile-bytecode = true
 [tool.uv.sources]
 gui = { workspace = true }
 nixconfig = { workspace = true }
+slog = {  path="../slog", editable=true }
 pycall = { path="../pycall", editable=true }
 
 [tool.uv.workspace]

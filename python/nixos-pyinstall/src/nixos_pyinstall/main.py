@@ -10,7 +10,7 @@ class Main() :
         # add probe command
         self.parse_cmd(subparsers)
         args = self.parser.parse_args(argv[1:])
-        args.func(args)
+        # args.func(args)
 
 
     def parse_cmd(self, subparsers) : 

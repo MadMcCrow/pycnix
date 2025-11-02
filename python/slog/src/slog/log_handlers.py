@@ -4,60 +4,78 @@
 from logging import (
     basicConfig as logConfig,
     getLogger,
+    Handler,
     StreamHandler,
     FileHandler,
     INFO,
     DEBUG,
     Formatter,
 )
-from sys import (
-    stdout,
-)
+from sys import stdout, argv
 from pathlib import (
     Path,
 )
-from typing import Optional
 
 # rich imports :
-try:
-    from rich.console import Console
-    from rich.logging import RichHandler
+from rich.console import Console
+from rich.logging import RichHandler
 
-    _rich_enabled = True
-except ModuleNotFoundError:
-    _rich_enabled = False
+# TODO : make this a config variable
+_rich_enabled = True
 
 
-# simply get the name of the running app
-__appname__ = Path(__file__).stem
+def formatter(
+    *, level: bool = True, time: bool = True, name: bool = True, caller: bool = True
+) -> Formatter:
+    """
+    build a log formatter
+    /note : str * bool = str if bool else ''
+    """
+    fstrs = [
+        "%(levelname)s" * level,
+        "%(asctime)s" * time,
+        "%(name)s" * name,
+        "%(message)s",
+        "(%(filename)s::%(funcName)s)" * caller,
+    ]
+    sep = " - "
+    return Formatter(sep.join(fstrs))
 
 
-def consoleHandler() -> StreamHandler:
+def consoleHandler() -> Handler:
     """
     create a stdout compatible handler
     """
     if _rich_enabled:
-        return RichHandler(file=Console(file=stdout), markup=True)
+        # see https://rich.readthedocs.io/en/latest/reference/logging.html
+        # for options
+        rh = RichHandler(console=Console(file=stdout), markup=True)
+        rh.setFormatter(formatter(level=False))
     else:
-        return StreamHandler(stream=stdout)
+        rh = StreamHandler(stream=stdout)
+        rh.setFormatter(formatter())
+    return rh
 
 
-def logfileHandler(path: Optional[str] = None) -> StreamHandler:
+def logfileHandler(path: str | None = None) -> Handler:
     """
     create a logHandler to write to a file at a correct directory
     """
+    appname = argv[0]
     if path is not None:
         pdir = Path(path)
         pdir.mkdir(parents=True, exist_ok=True)
-        logfile = pdir / f"{__appname__}.log"
+        logfile = pdir / f"{appname}.log"
     else:
-        logfile = Path(f"{__appname__}.log")
+        logfile = Path(f"{appname}.log")
     # delete any existing log and return
     logfile.unlink(missing_ok=True)
-    return FileHandler(str(logfile), encoding="utf-8")
+    fh = FileHandler(str(logfile), encoding="utf-8")
+    fh.setFormatter(formatter())
+    return fh
 
 
-def initialize(logpath: Optional[str] = None):
+def initialize(logpath: str | None = None):
     """
     make logging display on stdout
     TODO : replace by class
@@ -68,14 +86,8 @@ def initialize(logpath: Optional[str] = None):
     # set stderr log :
     chandler = consoleHandler()
     chandler.setLevel(INFO)
-    chandler.setFormatter(
-        Formatter(f"%(levelname)s : %(message)s ({__appname__}%(name)s)")
-    )
     # log to file :
     fhandler = logfileHandler(logpath)
     fhandler.setLevel(DEBUG)
-    fhandler.setFormatter(
-        Formatter(f"%(levelname)s - %(asctime)s - %(name)s - %(message)s")
-    )
     # set log config :
     logConfig(handlers=[fhandler, chandler], force=True)
