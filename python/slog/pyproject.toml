@@ -2,9 +2,10 @@
 name = "slog"
 version = "0.1.0"
 description = "simple module to write simplified logs"
-requires-python = "~=3.11"
-readme = "slog.md"
+requires-python = ">=3.10"
+readme = "README.md"
 dependencies = ["rich"]
 
-[tool.uv]
-package = true
+[build-system]
+requires = ["uv_build>=0.9.5,<0.10.0"]
+build-backend = "uv_build"
