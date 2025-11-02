@@ -16,8 +16,3 @@ requires-dist = [{ name = "pycall", editable = "../pycall" }]
 name = "pycall"
 version = "0.1.0"
 source = { editable = "../pycall" }
-
-[package.metadata]
-
-[package.metadata.requires-dev]
-richtext = [{ name = "rich" }]
