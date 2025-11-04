@@ -1,14 +1,11 @@
-#!/usr/bin/env python
+#! /usr/bin/env python3
+# write sensible log handlers
 
 # python imports
 from logging import (
-    basicConfig as logConfig,
-    getLogger,
     Handler,
     StreamHandler,
     FileHandler,
-    INFO,
-    DEBUG,
     Formatter,
 )
 from sys import stdout, argv
@@ -73,21 +70,3 @@ def logfileHandler(path: str | None = None) -> Handler:
     fh = FileHandler(str(logfile), encoding="utf-8")
     fh.setFormatter(formatter())
     return fh
-
-
-def initialize(logpath: str | None = None):
-    """
-    make logging display on stdout
-    TODO : replace by class
-    """
-    # reset default logger :
-    getLogger().handlers = []
-    getLogger().setLevel(0)
-    # set stderr log :
-    chandler = consoleHandler()
-    chandler.setLevel(INFO)
-    # log to file :
-    fhandler = logfileHandler(logpath)
-    fhandler.setLevel(DEBUG)
-    # set log config :
-    logConfig(handlers=[fhandler, chandler], force=True)
