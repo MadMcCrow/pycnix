@@ -6,3 +6,6 @@ dependencies = ["rich >= 14.0.0", "ffmpy"]
 
 [tool.uv]
 package = true
+
+[project.scripts]
+pysubfixer-cli = "cli:main"

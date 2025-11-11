@@ -3,8 +3,6 @@
 
 # main entry point : files
 from .media import Media
+
 # commands
-from .commands import (
-    FFprobe,
-    FFmpeg
-)
+from .commands import FFprobe, FFmpeg

@@ -43,34 +43,38 @@ def initialize(logpath: str | None = None):
 def caller_id() -> tuple[str, str]:
     """Returns an informative prefix for log output messages"""
     s = stack()
-    module_name = str(getmodulename(s[1][1]))
-    func_name = s[1][3]
+    module_name = str(getmodulename(s[2][1]))
+    func_name = s[2][3]
     return module_name, func_name
 
 
 def error(msg: str):
     if not __initialized:
         initialize()
-    logger = getLogger(caller_id()[0])
-    logger.error(msg)
+    mod, name = caller_id()
+    logger = getLogger(mod)
+    logger.error(f"{msg.strip()} ({mod}::{name})")
 
 
 def info(msg: str):
     if not __initialized:
         initialize()
-    logger = getLogger(caller_id()[0])
-    logger.info(msg)
+    mod, name = caller_id()
+    logger = getLogger(mod)
+    logger.info(f"{msg.strip()} ({mod}::{name})")
 
 
 def debug(msg: str):
     if not __initialized:
         initialize()
-    logger = getLogger(caller_id()[0])
-    logger.debug(msg)
+    mod, name = caller_id()
+    logger = getLogger(mod)
+    logger.debug(f"{msg.strip()} ({mod}::{name})")
 
 
 def warning(msg: str):
     if not __initialized:
         initialize()
-    logger = getLogger(caller_id()[0])
-    logger.warning(msg)
+    mod, name = caller_id()
+    logger = getLogger(mod)
+    logger.warning(f"{msg.strip()} ({mod}::{name})")

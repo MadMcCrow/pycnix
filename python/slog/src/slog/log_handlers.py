@@ -22,7 +22,7 @@ _rich_enabled = True
 
 
 def formatter(
-    *, level: bool = True, time: bool = True, name: bool = True, caller: bool = True
+    *, level: bool = True, time: bool = True, name: bool = True, caller: bool = False
 ) -> Formatter:
     """
     build a log formatter

@@ -8,15 +8,16 @@ from os import name as system
 from .ffcmd import FFcmd
 from .stdio import Parser
 
-class FFprobe(FFcmd) :
+
+class FFprobe(FFcmd):
     """
-        class to represent an instance of ffprobe running in the background
+    class to represent an instance of ffprobe running in the background
     """
 
-    class Parser(Parser) :
+    class Parser(Parser):
         """
         helper object to parse ffprobe infos
-        when ffprobe displays informations, 
+        when ffprobe displays informations,
         it looks like this :
              Stream #0:0(eng): Video: hevc (Main 10), yuv420p10le(tv, bt709), 1920x1080 [SAR 1:1 DAR 16:9], 23.98 fps, 23.98 tbr, 1k tbn (default) (forced)
                 Metadata:
@@ -29,9 +30,8 @@ class FFprobe(FFcmd) :
                     _STATISTICS_WRITING_DATE_UTC-eng: 2021-11-02 20:09:24
                     _STATISTICS_TAGS-eng: BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES
         """
-        keywords =  [
-                       "Stream", 
-                       "DURATION"
-                    ]
-    
-    cmd : str = "ffprobe.exe" if system == 'nt' else "ffprobe"
+
+        keywords = ["Stream", "DURATION"]
+
+    parser = Parser()
+    cmd: str = "ffprobe.exe" if system == "nt" else "ffprobe"

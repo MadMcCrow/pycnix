@@ -3,10 +3,12 @@
 # The Core of pycall
 
 
+# asyncio deps
+from asyncio import Task, TaskGroup, create_task, subprocess
 from shutil import which
 
-# asyncio deps
-from asyncio import Task, TaskGroup, create_task, subprocess, create_subprocess_exec
+# our simple log !
+from slog import info
 
 # ours
 from .output import Callback, Output
@@ -23,9 +25,9 @@ class Pycall(object):
     """
 
     __cmd: str = ""
-    __out: Output = None
+    __out: Output | None = None
     __args: list[str] = []
-    __task: Task = None
+    __task: Task | None = None
 
     @classmethod
     async def call(cls, cmd: str, args: list[str], *cbs: Callback):
@@ -35,7 +37,8 @@ class Pycall(object):
         """
         self: Pycall = cls()
         self.__private_init(cmd, args, list(*cbs))
-        await self.__process()
+        self.__task = create_task(self.__process())
+        await self.__task
         return self
 
     async def __process(self) -> None:
@@ -43,13 +46,16 @@ class Pycall(object):
         run the actual process, along with a throbber,
         an output object and some parsing tasks
         """
-        # create process :
-        ps = await create_subprocess_exec(
-            self.__cmd, *self.__args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        shellcmd = " ".join([self.__cmd] + self.__args)
+        info(f"calling '{shellcmd}' ")
+        ps = await subprocess.create_subprocess_shell(
+            shellcmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
         async with TaskGroup() as tg:
-            tg.create_task(ps.wait())
-            tg.create_task(self.__out.parse_stdio(ps))
+            _ = tg.create_task(ps.wait())
+            _ = tg.create_task(self.__out.parse_stdio(ps))
 
     def __await__(self):
         return self.__task.__await__()
@@ -64,14 +70,12 @@ class Pycall(object):
         self.__out = Output(cbs)
         # TODO : perform checks on args :
         self.__args = args
-        # init output :
-        self.__task = create_task(self.__process())
 
     def rc(self):
         return self.__out.return_code()
 
     def stdout(self) -> str:
-        return self.__out._out
+        return self.__out.out
 
     def stderr(self) -> str:
-        return self.__out._err
+        return self.__out.err

@@ -18,8 +18,8 @@ class Output(object):
     """
 
     def __init__(self, cbs: list[Callback] = []):
-        self._out: str = ""
-        self._err: str = ""
+        self.out: str = ""
+        self.err: str = ""
         self._cbs: list[Callback] = cbs
         self._prg: float | None = None
         self._rc: int | None = None
@@ -45,9 +45,9 @@ class Output(object):
             if line:
                 txt: str = line.decode(getencoding())
                 if err:
-                    self._err += f"\n{txt}"
+                    self.err += f"\n{txt}"
                 else:
-                    self._out += f"\n{txt}"
+                    self.out += f"\n{txt}"
                 for cb in self._cbs:
                     try:
                         res = cb(txt, err)
