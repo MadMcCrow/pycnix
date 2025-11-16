@@ -18,7 +18,6 @@ builtins.listToAttrs (
     [
       "pycall"
       "ffmpy"
-      "hello-world"
       "pysubfixer"
       "slog"
     ]

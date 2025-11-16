@@ -1,5 +1,7 @@
+# flake.nix
+# define input and outputs of pycnix
 {
-  description = "Develop Python on Nix with uv";
+  description = "collection of python packages and apps";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -37,7 +39,6 @@
       forAllSystems = nixpkgs.lib.genAttrs lib.systems.flakeExposed;
     in
     {
-
       packages = forAllSystems (system: import ./nix/packages.nix (inputs // { inherit system lib; }));
       apps = forAllSystems (system: import ./nix/apps.nix (inputs // { inherit system lib; }));
     };
