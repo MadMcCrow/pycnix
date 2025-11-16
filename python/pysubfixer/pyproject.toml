@@ -5,14 +5,19 @@ description = "tool to change embedded subtitles"
 authors = [{ name = "MadMcCrow", email = "do-not-mail.me@please.com" }]
 requires-python = "~=3.11"
 readme = "README.md"
-dependencies = ["pycall>=0.1,<0.2", "gui", "cli"]
+dependencies = ["pycall>=0.1,<0.2"]
+
+
+[ project.optional-dependencies ]
+pysubfixer-gui = ["gui"]
+pysubfixer-cli = ["cli"]
 
 [tool.uv]
 compile-bytecode = true
 
 [tool.uv.sources]
-gui = { workspace = true }
-cli = { workspace = true }
+gui = { workspace = true}
+cli = { workspace = true}
 ffmpy = { path="../ffmpy", editable=true }
 pycall = { path="../pycall", editable=true }
 slog = { path="../slog", editable=true }

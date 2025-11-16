@@ -1,5 +1,4 @@
 version = 1
-revision = 1
 requires-python = ">=3.11, <4"
 
 [manifest]
@@ -144,15 +143,21 @@ name = "pysubfixer"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "cli" },
-    { name = "gui" },
     { name = "pycall" },
+]
+
+[package.optional-dependencies]
+pysubfixer-cli = [
+    { name = "cli" },
+]
+pysubfixer-gui = [
+    { name = "gui" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "cli", editable = "packages/cli" },
-    { name = "gui", editable = "packages/gui" },
+    { name = "cli", marker = "extra == 'pysubfixer-cli'", editable = "packages/cli" },
+    { name = "gui", marker = "extra == 'pysubfixer-gui'", editable = "packages/gui" },
     { name = "pycall", editable = "../pycall" },
 ]
 
