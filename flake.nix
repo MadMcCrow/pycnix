@@ -6,17 +6,22 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    # our flake support tools
+    pastry = {
+      url = "github:MadMcCrow/pastry";
+      inputs.nixpkgs.follows = "nixpkgs";
+      };
+
+    # python :
     pyproject-nix = {
       url = "github:pyproject-nix/pyproject.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     uv2nix = {
       url = "github:pyproject-nix/uv2nix";
       inputs.pyproject-nix.follows = "pyproject-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     pyproject-build-systems = {
       url = "github:pyproject-nix/build-system-pkgs";
       inputs.pyproject-nix.follows = "pyproject-nix";
